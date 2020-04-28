@@ -1,0 +1,379 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"  
+  "http://www.w3.org/TR/html4/loose.dtd">  
+<html > 
+<head><title>CS2002 W14-SP - Stacks and Thread Safety</title> 
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"> 
+<meta name="generator" content="TeX4ht (http://www.tug.org/tex4ht/)"> 
+<meta name="originator" content="TeX4ht (http://www.tug.org/tex4ht/)"> 
+<!-- html --> 
+<meta name="src" content="W14-SP.tex"> 
+<link rel="stylesheet" type="text/css" href="W14-SP.css"> 
+</head><body 
+>
+   <div class="maketitle">
+                                                                                      
+                                                                                      
+                                                                                      
+                                                                                      
+
+<h2 class="titleHead">CS2002 W14-SP - Stacks and Thread Safety</h2>
+<div class="author" ><span 
+class="pplr7t-x-x-120">Jon Lewis (jon.lewis@st-andrews.ac.uk)</span></div><br />
+<div class="date" ><span 
+class="pplr7t-x-x-120">Due date: Wednesday 13th May, 21:00</span><br />
+<span 
+class="pplr7t-x-x-120">Weighting: 25%</span></div>
+   </div>
+   <h4 class="likesubsectionHead"><a 
+ id="x1-1000"></a>Objective</h4>
+<!--l. 20--><p class="noindent" >To gain experience with developing and testing thread-safe data types in C.
+<!--l. 22--><p class="noindent" >
+   <h4 class="likesubsectionHead"><a 
+ id="x1-2000"></a>Learning Outcomes</h4>
+<!--l. 24--><p class="noindent" >By the end of this practical you should be capable of:
+     <ul class="itemize1">
+     <li class="itemize">constructing and using generic Stack implementations in C
+     </li>
+     <li class="itemize">using dynamic memory allocation
+     </li>
+     <li class="itemize">developing thread-safe data types in C using POSIX threads and synchronisation
+     </li>
+     <li class="itemize">writing tests to ensure correct operation of your Stack implementations in C</li></ul>
+<!--l. 34--><p class="noindent" >
+   <h4 class="likesubsectionHead"><a 
+ id="x1-3000"></a>Overview</h4>
+<!--l. 35--><p class="noindent" >In this practical you will write an array-based implementation of a fixed-size generic Stack in C. You will design
+and implement tests to check correct operation of your stack. You will then use/extend your first Stack
+implementation to provide a thread-safe, BlockingStack implementation and design and implement tests for
+your BlockingStack.
+<!--l. 37--><p class="noindent" >
+   <h4 class="likesubsectionHead"><a 
+ id="x1-4000"></a>Getting started</h4>
+<!--l. 38--><p class="noindent" >To start with, you should download and decompress the <span 
+class="pcrr7t-">zip </span>file at
+                                                                                      
+                                                                                      
+<div class="center" 
+>
+<!--l. 40--><p class="noindent" >
+<!--l. 41--><p class="noindent" ><a 
+href="http://studres.cs.st-andrews.ac.uk/CS2002/Practicals/W14-SP/code.zip" class="url" ><span 
+class="pcrr7t-">http://studres.cs.st-andrews.ac.uk/CS2002/Practicals/W14-SP/code.zip</span></a></div>
+<!--l. 44--><p class="noindent" >Please note that the <span 
+class="pcrr7t-">zip </span>file contains a number of files in the <span 
+class="pcrr7t-">src </span>directory, some of which are blank or only
+partially implemented. <span 
+class="pplb7t-">Take care that you do not accidentally decompress it again once you have worked on</span>
+<span 
+class="pplb7t-">your assignment, thereby accidentally overwriting your own implementation.</span>
+<!--l. 50--><p class="noindent" >
+   <h4 class="likesubsectionHead"><a 
+ id="x1-5000"></a>Stack Implementation</h4>
+<!--l. 51--><p class="noindent" >You are required to develop and test a generic, fixed-size stack implementation in accordance with the module
+interface in <span 
+class="pcrr7t-">Stack.h</span>. As usual, coding to an interface is important, so please don&#8217;t change the Stack function
+signatures that are provided.
+<!--l. 53--><p class="noindent" ><br 
+class="newline" />You are supplied with a <span 
+class="pcrr7t-">Stack.c </span>file containing the stack functions which do not do anything
+sensible yet and which you will have to implement. You are also provided with a <span 
+class="pcrr7t-">TestStack.c </span>file
+into which you should write tests to verify correct operation of your stack. The file contains two
+simple tests to show you how to write tests and call your test functions from the <span 
+class="pcrr7t-">main </span>function in
+<span 
+class="pcrr7t-">TestStack.c</span>.
+<!--l. 56--><p class="noindent" ><br 
+class="newline" />You are supposed to use dynamic memory allocation and pointers to structs for your Stack data type and
+functions. You may find material in C_SP Lectures 7 - 10 useful, including the Person example
+L07-08/PersonStructDynamic. While you are supposed to implement this stack using a dynamically allocated
+array, you may also find the Linked List example L10/IntegerList interesting from the point of view of seeing
+how an integer list can be implemented in C using dynamic memory allocation. There are hints in the lecture
+how you might create a generic list instead.
+<!--l. 59--><p class="noindent" ><br 
+class="newline" />You will have to add suitable members to the <span 
+class="pcrr7t-">struct Stack </span>definition in <span 
+class="pcrr7t-">Stack.h</span>. You should examine the
+function declarations and comments for each function in <span 
+class="pcrr7t-">Stack.h </span>to give you an insight into how you should
+implement your stack, what elements you should add to your <span 
+class="pcrr7t-">struct Stack</span>, and what the expected
+behaviour of the functions is.
+<!--l. 62--><p class="noindent" ><br 
+class="newline" />For example, <span 
+class="pcrr7t-">Stack</span><span 
+class="pcrr7t-">_push(Stack&#x22C6; this, void&#x22C6; element) </span>takes a <span 
+class="pcrr7t-">Stack&#x22C6; </span>argument (i.e. a pointer to a
+<span 
+class="pcrr7t-">Stack </span>struct) representing the stack on which to operate, and a generic (in the C sense) <span 
+class="pcrr7t-">void&#x22C6; </span>argument,
+representing the element that should be pushed onto the stack. As such, it should be possible to push a pointer
+to any value onto the stack. The code comment specifies that the function should return <span 
+class="pcrr7t-">true on success</span>
+<span 
+class="pcrr7t-">and false on push failure when element is NULL or stack is full</span>. As such, NULL values
+are not permitted in this stack and the <span 
+class="pcrr7t-">push </span>operation should return false in this case or if the stack is
+full.
+<!--l. 65--><p class="noindent" ><br 
+class="newline" />The <span 
+class="pcrr7t-">Stack&#x22C6; new</span><span 
+class="pcrr7t-">_Stack(int max</span><span 
+class="pcrr7t-">_size) </span>&#8221;constructor&#8221; function takes a size parameter and returns a
+pointer to a new, suitably initialised <span 
+class="pcrr7t-">Stack </span>struct for which memory should have been allocated dynamically.
+As the maximum stack size is not known at compile time, you should also use dynamic memory allocation for
+the stack&#8217;s <span 
+class="pcrr7t-">store</span>. You will have to allocate enough space for a dynamically allocated array of <span 
+class="pcrr7t-">max</span><span 
+class="pcrr7t-">_size</span>
+<span 
+class="pcrr7t-">void&#x22C6; </span>elements.
+<!--l. 69--><p class="noindent" ><br 
+class="newline" />As you develop your implementation, you should also write Stack tests (such as <span 
+class="pcrr7t-">pushOneElement() </span>for
+example) by writing functions in <span 
+class="pcrr7t-">TestStack.c </span>as indicated in the file and calling these by adding lines
+(such <span 
+class="pcrr7t-">runTest(pushOneElement);</span>) to the <span 
+class="pcrr7t-">main </span>function. Although your stack is designed to
+store non-NULL, generic <span 
+class="pcrr7t-">void &#x22C6; </span>pointers, it can also be used to store non-zero integers directly if
+you want, because an <span 
+class="pcrr7t-">int </span>can safely be cast to <span 
+class="pcrr7t-">void&#x22C6; </span>before pushing and cast back to <span 
+class="pcrr7t-">int </span>when
+popping.
+<!--l. 72--><p class="noindent" ><br 
+class="newline" />There is a simple <span 
+class="pcrr7t-">assert </span>statement that you can make use of in tests and which is defined in &#8221;<span 
+class="pcrr7t-">myassert.h</span>&#8221;.
+                                                                                      
+                                                                                      
+A <span 
+class="pcrr7t-">setup </span>function in <span 
+class="pcrr7t-">TestStack.c </span>is designed to create a new stack with some default size which can be used
+for each test. Similarly, a <span 
+class="pcrr7t-">teardown </span>function has been provided to destroy the test stack after each
+test. The <span 
+class="pcrr7t-">setup </span>and <span 
+class="pcrr7t-">teardown </span>functions are called by <span 
+class="pcrr7t-">runTest </span>before and after running each
+test.
+<!--l. 75--><p class="noindent" ><br 
+class="newline" />Instructions on &#8221;Compiling Testing and Stacscheck&#8221; and some &#8221;General Tips&#8221; are given below after the
+&#8221;Thread-Safe Blocking Stack&#8221; section. Please do read these before starting, as they may help you avoid
+problems down the line.
+<!--l. 78--><p class="noindent" >
+   <h4 class="likesubsectionHead"><a 
+ id="x1-6000"></a>Thread-Safe Blocking Stack</h4>
+<!--l. 80--><p class="noindent" >Once you have developed and tested your stack implementation and are sure that it works, you can move on.
+In this part, you are going to develop and test a thread-safe blocking version of your fixed-size stack in the
+associated files <span 
+class="pcrr7t-">BlockingStack.h</span>, <span 
+class="pcrr7t-">BlockingStack.c </span>and <span 
+class="pcrr7t-">TestBlockingStack.c</span>. The thread-safe
+BlockingStack has the same core operations as a Stack, but with some crucial differences in blocking when
+full/empty (on push/pop respectively) as outlined in the code comments in the module interface
+<span 
+class="pcrr7t-">BlockingStack.h</span>.
+<!--l. 82--><p class="noindent" ><br 
+class="newline" />There are different ways to approach this task, one which involves re-use, where your <span 
+class="pcrr7t-">BlockingStack</span>
+essentially contains a <span 
+class="pcrr7t-">Stack </span>and the <span 
+class="pcrr7t-">BlockingStack</span><span 
+class="pcrr7t-">_ </span>functions add the thread-safety, the blocking aspects,
+and call the corresponding <span 
+class="pcrr7t-">Stack</span><span 
+class="pcrr7t-">_ </span>functions. Alternatively, you could design your <span 
+class="pcrr7t-">BlockingStack </span>as a
+completely independent module which does not have to call functions defined in <span 
+class="pcrr7t-">Stack.c</span>. There are
+probably pros and cons to each approach and you should consider these prior to starting this
+part.
+<!--l. 85--><p class="noindent" ><br 
+class="newline" />The blocking property should not have to involve busy-waiting, so you will use semaphores for this bit.
+Thread-safety should be ensured by using mutexes. Please note that the BlockingStack itself and its operations
+should be thread-safe and satisfy the semantics of blocking when full/empty without the calling (client) code
+having to operate on any mutexes or semaphores directly. Client code should merely have to call the functions
+defined in the module interface. As such, you should consider where the mutex and semaphores should be
+stored for your <span 
+class="pcrr7t-">BlockingStack </span>object.
+<!--l. 88--><p class="noindent" ><br 
+class="newline" />When designing, implementing and testing your blocking stack implementation, you should make sure you
+understand the material covered in C_SP Lectures 16 - 17 and may find it useful to study examples
+L16/threads2 (for creating and joining threads), L17/thr_broken_fixed5 (for use of mutexes in making access to
+<span 
+class="pcrr7t-">bowl </span>and <span 
+class="pcrr7t-">tap </span>thread-safe), L19/bounded_buffer and L19/bounded_buffer_named_sems (to see
+how mutexes and semaphores are used to provide thread-safe, blocking access to a shared integer
+array).
+<!--l. 91--><p class="noindent" ><br 
+class="newline" />The tests you write for your blocking stack in <span 
+class="pcrr7t-">TestBlockingStack.c </span>should test the basic stack operations
+in a similar way to how your Stack was tested in the first part. However, you should also write one or more
+tests that create a number of threads (at least two threads) which access a single blocking stack. The threads
+might each execute either a suitable number of <span 
+class="pcrr7t-">BlockingStack</span><span 
+class="pcrr7t-">_push </span>or <span 
+class="pcrr7t-">BlockingStack</span><span 
+class="pcrr7t-">_pop </span>operations
+on the shared stack and the test might involve checking whether all values pushed onto the stack are also
+eventually popped. The L19 bounded buffer examples (and associated discussion in the lecture) may be of use
+here. You might also be able to demonstrate the blocking aspect visually in a different test/program by
+making the either the pushing or popping thread sleep occasionally such that the other thread has to
+block.
+<!--l. 96--><p class="noindent" >
+   <h4 class="likesubsectionHead"><a 
+ id="x1-7000"></a>Compiling Testing and Stacscheck</h4>
+<!--l. 98--><p class="noindent" >You are supplied with a <span 
+class="pcrr7t-">Makefile </span>to help you build your stack implementations and tests. The following
+lines, executed from a Terminal window and from within the <span 
+class="pcrr7t-">src </span>directory, should permit you to build and run
+                                                                                      
+                                                                                      
+your tests over your stack implementations.
+                                                                                      
+                                                                                      
+   <div class="verbatim" id="verbatim-1">
+make
+&#x00A0;<br />./TestStack
+&#x00A0;<br />./TestBlockingStack
+</div>
+<!--l. 104--><p class="nopar" >
+<!--l. 106--><p class="noindent" ><br 
+class="newline" />If you execute <span 
+class="pcrr7t-">make </span>on the code supplied in <span 
+class="pcrr7t-">code.zip </span>on StudRes, the compiler will generate a
+number of warnings, because the Stack functions are not implemented yet. As a result, executing
+<span 
+class="pcrr7t-">./TestStack </span>and <span 
+class="pcrr7t-">./TestBlockingStack </span>will show failures for the sample tests included as shown
+below.
+                                                                                      
+                                                                                      
+   <div class="verbatim" id="verbatim-2">
+palain:src&#x00A0;jonl$&#x00A0;./TestStack
+&#x00A0;<br />Assertion&#x00A0;failed&#x00A0;in&#x00A0;test&#x00A0;newStackIsNotNull&#x00A0;(TestStack.c&#x00A0;line&#x00A0;76)
+&#x00A0;<br />Assertion&#x00A0;failed&#x00A0;in&#x00A0;test&#x00A0;newStackSizeZero&#x00A0;(TestStack.c&#x00A0;line&#x00A0;84)
+&#x00A0;<br />Stack&#x00A0;Tests&#x00A0;complete:&#x00A0;0&#x00A0;/&#x00A0;2&#x00A0;tests&#x00A0;successful.
+&#x00A0;<br />
+&#x00A0;<br />palain:src&#x00A0;jonl$&#x00A0;./TestBlockingStack
+&#x00A0;<br />Assertion&#x00A0;failed&#x00A0;in&#x00A0;test&#x00A0;newStackIsNotNull&#x00A0;(TestBlockingStack.c&#x00A0;line&#x00A0;77)
+&#x00A0;<br />Assertion&#x00A0;failed&#x00A0;in&#x00A0;test&#x00A0;newStackSizeZero&#x00A0;(TestBlockingStack.c&#x00A0;line&#x00A0;85)
+&#x00A0;<br />
+&#x00A0;<br />BlockingStack&#x00A0;Tests&#x00A0;complete:&#x00A0;0&#x00A0;/&#x00A0;2&#x00A0;tests&#x00A0;successful.
+</div>
+<!--l. 120--><p class="nopar" >
+<!--l. 122--><p class="noindent" ><br 
+class="newline" />If you wish to build your project using <span 
+class="pcrr7t-">gcc </span>instead of <span 
+class="pcrr7t-">clang</span>, you can alter the first line in the supplied
+makefile from <span 
+class="pcrr7t-">CC = clang </span>to <span 
+class="pcrr7t-">CC = gcc</span>.
+<!--l. 125--><p class="noindent" ><br 
+class="newline" />Stacscheck can be used to execute your own tests using the command
+                                                                                      
+                                                                                      
+   <div class="verbatim" id="verbatim-3">
+cd&#x00A0;~/CS2002/W14-SP
+&#x00A0;<br />stacscheck&#x00A0;/cs/studres/CS2002/Practicals/W14-SP/Tests
+</div>
+<!--l. 130--><p class="nopar" >
+<!--l. 132--><p class="noindent" >assuming <span 
+class="pcrr7t-">CS2002/W14-SP </span>is your assignment directory. We will run some of our own private tests over your
+implementations following submission.
+<!--l. 137--><p class="noindent" >
+   <h4 class="likesubsectionHead"><a 
+ id="x1-8000"></a>General Tips</h4>
+     <ul class="itemize1">
+     <li class="itemize">Don&#8217;t  try  to  develop  the  whole  implementation  in  one  go  as  this  will  probably  result  in
+     more bugs and lengthier, more painful debugging. Instead, it may be sensible to develop your
+     implementation in stages using a TDD approach, writing tests as you go.
+     </li>
+     <li class="itemize">At the start, you will have to choose a suitable struct to represent your stack and will have to
+     ensure you can allocate memory for the stack and its elements. At that point you probably want
+     to implement your <span 
+class="pcrr7t-">new</span><span 
+class="pcrr7t-">_Stack </span>and <span 
+class="pcrr7t-">Stack</span><span 
+class="pcrr7t-">_size </span>functions such that that you can get the two
+     supplied tests to pass.
+     </li>
+     <li class="itemize">The next step might be to implement <span 
+class="pcrr7t-">Stack</span><span 
+class="pcrr7t-">_isEmpty </span>and to write a test for this function.
+     </li>
+     <li class="itemize">Once your implementation passes tests for size and isEmpty, you can probably move on to the
+     other operations: push, pop, clear, and destroy, writing suitable tests as you go.
+     </li>
+     <li class="itemize">Only <span 
+class="pplri7t-">free </span>things you have <span 
+class="pplri7t-">malloc</span>-ed, or else bad things happen.
+     </li>
+     <li class="itemize">Repeat the step-by-step development approach for your BlockingStack implementation.
+     </li>
+     <li class="itemize">When using semaphores and mutexes for the thread-safe blocking stack, make sure you always
+     initialise these properly.
+     </li>
+     <li class="itemize">Always check the manual pages for the functions you call.
+     </li>
+     <li class="itemize">Check POSIX function return values &#8211; checking the return values from mutex and semaphore
+     functions is very important, as is writing suitable error and cleanup functions as shown in the L19
+     bounded buffer example &#8211; this is a good way to cut down on debugging time.
+     </li></ul>
+                                                                                      
+                                                                                      
+<!--l. 152--><p class="noindent" >
+   <h4 class="likesubsectionHead"><a 
+ id="x1-9000"></a>Deliverables</h4>
+<!--l. 154--><p class="noindent" >Hand in via MMS, by the deadline of 9pm on Wednesday of Week 14, a zip file containing:
+     <ul class="itemize1">
+     <li class="itemize">Your assignment directory with all your source code for implementation and tests.
+     </li>
+     <li class="itemize">A   PDF   report   describing   your   design   and   implementation,   testing,   any   difficulties   you
+     encountered, how you tested your implementation. Take care to explain and justify your design
+     and implementation decisions for stacks and tests in clarity and detail.</li></ul>
+<!--l. 161--><p class="noindent" >
+   <h4 class="likesubsectionHead"><a 
+ id="x1-10000"></a>Marking Guidance</h4>
+<!--l. 163--><p class="noindent" >The submission will be marked according to the general mark descriptors at:
+<div class="center" 
+>
+<!--l. 164--><p class="noindent" >
+<!--l. 165--><p class="noindent" ><a 
+href="https://studres.cs.st-andrews.ac.uk/CS2002/Assessment/descriptors.pdf" class="url" ><span 
+class="pcrr7t-">https://studres.cs.st-andrews.ac.uk/CS2002/Assessment/descriptors.pdf</span></a></div>
+<!--l. 168--><p class="noindent" >A very good attempt achieving almost all required functionality, together with a clear report showing a good
+level of understanding, can achieve a mark of 14 - 16. This means you should produce very good code with
+very good decomposition and testing and provide clear explanations and justifications of design and
+implementation decisions in your report. To achieve a mark of 17 or above, you will need to implement all
+required functionality. Quality and clarity of design, implementation, testing, and your report are key at the top
+end. <br 
+class="newline" />
+<!--l. 170--><p class="noindent" >
+   <h4 class="likesubsectionHead"><a 
+ id="x1-11000"></a>Lateness</h4>
+<!--l. 171--><p class="noindent" >The standard penalty for late submission applies (Scheme B: 1 mark per 8 hour period, or part thereof):
+<a 
+href="http://info.cs.st-andrews.ac.uk/student-handbook/learning-teaching/assessment.html#lateness-penalties" class="url" ><span 
+class="pcrr7t-">http://info.cs.st-andrews.ac.uk/student-handbook/learning-teaching/assessment.html#lateness-penalties</span></a>
+<!--l. 174--><p class="noindent" >
+   <h4 class="likesubsectionHead"><a 
+ id="x1-12000"></a>Good Academic Practice</h4>
+<!--l. 175--><p class="noindent" >As usual, I would remind you to ensure you are following the relevant guidelines on good academic practice as
+outlined at
+<div class="center" 
+>
+<!--l. 176--><p class="noindent" >
+<!--l. 177--><p class="noindent" ><a 
+href="https://www.st-andrews.ac.uk/students/rules/academicpractice/" class="url" ><span 
+class="pcrr7t-">https://www.st-andrews.ac.uk/students/rules/academicpractice/</span></a></div>
+    
+</body></html> 
+
+                                                                                      
+
+
