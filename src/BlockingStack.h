@@ -23,7 +23,8 @@ typedef struct BlockingStack BlockingStack;
 struct BlockingStack {
   Stack* stack;
   pthread_mutex_t mutex;
-  sem_t semaphore;
+  sem_t sem_pop;
+  sem_t sem_push;
 };
 
 /*

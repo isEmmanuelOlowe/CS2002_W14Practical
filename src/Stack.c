@@ -70,10 +70,7 @@ int Stack_size(Stack* this) {
  * Returns true is this Stack is empty, false otherwise.
  */
 bool Stack_isEmpty(Stack* this) {
-	if (this->size == 0) {
-		return true;
-	}
-	return false;
+	return (this->size == 0 );
 }
 
 /*
