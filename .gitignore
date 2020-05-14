@@ -1,0 +1,7 @@
+*.o
+*pdb
+*.ilk
+*.exe
+*ps1
+TestStack
+TestBlockingStack
